@@ -12,19 +12,27 @@
 #define U_MS_D &mmv MOVE_DOWN
 #define U_MS_L &mmv MOVE_LEFT
 #define U_MS_R &mmv MOVE_RIGHT
-#define ZMK_MOUSE_DEFAULT_MOVE_VAL 1200  //  600
-#define ZMK_MOUSE_DEFAULT_SCRL_VAL 20    // 10
+#define U_WH_U &msc SCRL_UP
+#define U_WH_D &msc SCRL_DOWN
+#define U_WH_L &msc SCRL_LEFT
+#define U_WH_R &msc SCRL_RIGHT
+
+&mmv {
+};
+
+&msc {
+};
 
 / {
     behaviors {
         mmv {
-            acceleration-exponent = <1>;      // 1
-            time-to-max-speed-ms = <900>;    // 40
-            delay-ms = <0>;                   // 0
+            acceleration-exponent = <2>;      // 1
+            time-to-max-speed-ms = <2000>;    // 40
+            delay-ms = <500>;                   // 0
         };
 
         msc {
-            acceleration-exponent = <1>;      // 0
+            acceleration-exponent = <2>;      // 0
             time-to-max-speed-ms = <400>;      // 500
             delay-ms = <0>;                   //   10
         };
@@ -38,45 +46,144 @@
         tap-ms = <30>;
     };
 
+    layer_3_td: layer_3_td {
+        compatible = "zmk,behavior-tap-dance";
+        label = "LAYER_3_TD";
+        #binding-cells = <0>;
+        bindings = <&hold_tap_layer 3 3>, <&tog 3>;
+    };
+
+    hold_tap_layer: hold_tap_layer {
+        compatible = "zmk,behavior-hold-tap";
+        label = "HOLD_TAP_LAYER";
+        bindings = <&mo>, <&sl>;
+
+        #binding-cells = <2>;
+        tapping-term-ms = <200>;
+    };
+
+    shift_bootloader: shift_bootloader {
+        compatible = "zmk,behavior-mod-morph";
+        label = "SHIFT_BOOTLOADER";
+        bindings = <&trans>, <&bootloader>;
+
+        #binding-cells = <0>;
+        mods = <(MOD_LSFT|MOD_RSFT)>;
+    };
+
+    shift_reset: shift_reset {
+        compatible = "zmk,behavior-mod-morph";
+        label = "SHIFT_RESET";
+        bindings = <&trans>, <&sys_reset>;
+
+        #binding-cells = <0>;
+        mods = <(MOD_LSFT|MOD_RSFT)>;
+    };
+
+    backspace_shift_del: backspace_shift_del {
+        compatible = "zmk,behavior-mod-morph";
+        label = "BACKSPACE_SHIFT_DEL";
+        bindings = <&kp BACKSPACE>, <&kp DELETE>;
+
+        #binding-cells = <0>;
+        mods = <(MOD_RSFT|MOD_LSFT)>;
+    };
+
+    hold_tap_macro: hold_tap_macro {
+        compatible = "zmk,behavior-hold-tap";
+        label = "HOLD_TAP_MACRO";
+        bindings = <&macro_5>, <&kp>;
+
+        #binding-cells = <2>;
+        tapping-term-ms = <200>;
+    };
+
+    macros {
+        macro_5: macro_5 {
+            compatible = "zmk,behavior-macro-one-param";
+            #binding-cells = <1>;
+            bindings = <&macro_param_1to1 &kp MACRO_PLACEHOLDER &macro_param_1to1 &kp MACRO_PLACEHOLDER &macro_param_1to1 &kp MACRO_PLACEHOLDER &macro_param_1to1 &kp MACRO_PLACEHOLDER &macro_param_1to1 &kp MACRO_PLACEHOLDER>;
+        };
+
+        mouse_layer_on_move: test_macro {
+            compatible = "zmk,behavior-macro-two-param";
+            #binding-cells = <2>;
+            bindings =
+                <&macro_press>,
+                <&macro_param_1to1 &mmv MACRO_PLACEHOLDER>,
+                <&macro_tap>,
+                <&macro_param_2to1 &to MACRO_PLACEHOLDER>,
+                <&macro_pause_for_release>,
+                <&macro_release>,
+                <&macro_param_1to1 &mmv MACRO_PLACEHOLDER>;
+
+            label = "TEST_MACRO";
+        };
+    };
+
     keymap {
         compatible = "zmk,keymap";
 
         layer0 {
             bindings = <
-&kp ESC     &kp N1     &kp N2        &kp N3        &kp N4  &kp N5       &kp UP_ARROW     &kp N6     &kp N7     &kp N8     &kp N9           &kp N0      &kp BACKSPACE
-&kp TAB     &kp Q      &kp W         &kp E         &kp R   &kp T        &kp DOWN_ARROW   &kp Y      &kp U      &kp I      &kp O            &kp P       &kp BSLH
-&kp CAPS    &kp A      &kp S         &kp D         &kp F   &kp G        &kp LEFT_ARROW   &kp H      &kp J      &kp K      &kp L            &kp SEMI    &kp APOS
-&kp LSHFT   &kp Z      &kp X         &kp C         &kp V   &kp B        &kp RIGHT_ARROW  &kp N      &kp M      &kp COMMA  &kp DOT          &kp FSLH    &kp ENTER
-&kp C_MUTE  &kp LCTRL  &kp LEFT_GUI  &kp LEFT_ALT  &mo 1   &kp SPACE    &kp ENTER        &kp SPACE  &kp ENTER  &mo 2      &kp RIGHT_SHIFT  &kp DELETE
+&kp ESC     &kp N1     &kp N2        &kp N3  &kp N4        &kp N5       &mouse_layer_on_move MOVE_UP 4     &kp N6     &kp N7     &kp N8     &kp N9       &kp N0      &backspace_shift_del
+&kp TAB     &kp Q      &kp W         &kp E   &kp R         &kp T        &mouse_layer_on_move MOVE_DOWN 4   &kp Y      &kp U      &kp I      &kp O        &kp P       &kp BSLH
+&kp GRAVE   &kp A      &kp S         &kp D   &kp F         &kp G        &mouse_layer_on_move MOVE_LEFT 4   &kp H      &kp J      &kp K      &kp L        &kp SEMI    &kp APOS
+&kp LSHFT   &kp Z      &kp X         &kp C   &kp V         &kp B        &mouse_layer_on_move MOVE_RIGHT 4  &kp N      &kp M      &kp COMMA  &kp DOT      &kp FSLH    &mt RIGHT_SHIFT ENTER
+&kp C_MUTE  &kp LCTRL  &kp LEFT_ALT  &mo 1   &kp LEFT_GUI  &kp SPACE    &mkp LCLK                          &kp SPACE  &kp SPACE  &mo 2      &layer_3_td  &kp DELETE
             >;
 
             sensor-bindings = <&inc_dec_kp C_VOLUME_UP C_VOL_DN>;
-            display-name = "LAYER0";
+            display-name = "Default";
         };
 
         layer_1 {
             bindings = <
-&kp GRAVE   &kp F1           &kp F2          &kp F3           &kp F4           &kp F5             &mmv MOVE_UP     &kp F6           &kp F7           &kp F8      &kp F9     &kp F10           &trans
-&trans      &kp GRAVE        &mkp LCLK       &mkp MCLK        &mkp RCLK        &mkp MB4           &mmv MOVE_DOWN   &kp PG_UP        &kp END          &kp UP      &kp HOME   &kp MINUS         &kp EQUAL
-&trans      &kp TILDE        &trans          &trans           &trans           &mkp MB5           &mmv MOVE_LEFT   &kp PG_DN        &kp LEFT         &kp DOWN    &kp RIGHT  &kp LEFT_BRACKET  &kp RIGHT_BRACKET
-&trans      &rgb_ug RGB_OFF  &rgb_ug RGB_ON  &rgb_ug RGB_EFF  &rgb_ug RGB_EFR  &rgb_ug RGB_SPI    &mmv MOVE_RIGHT  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp INSERT  &kp F11    &kp F12           &trans
-&kp C_MUTE  &trans           &trans          &trans           &trans           &trans             &mkp LCLK        &trans           &trans           &trans      &trans     &trans
+&kp GRAVE   &kp F1                     &kp F2                     &kp F3                             &kp F4                       &kp F5             &trans  &kp F6           &kp F7           &kp F8       &kp F9     &kp F10           &trans
+&trans      &kp HOME                   &kp END                    &msc SCRL_RIGHT                    &msc SCRL_LEFT               &msc SCRL_DOWN     &trans  &kp HOME         &kp PAGE_DOWN    &kp PAGE_UP  &kp END    &kp MINUS         &kp EQUAL
+&trans      &hold_tap_macro LEFT LEFT  &hold_tap_macro DOWN DOWN  &hold_tap_macro UP_ARROW UP_ARROW  &hold_tap_macro RIGHT RIGHT  &msc SCRL_UP       &trans  &kp LEFT         &kp DOWN         &kp UP       &kp RIGHT  &kp LEFT_BRACKET  &kp RIGHT_BRACKET
+&trans      &rgb_ug RGB_OFF            &rgb_ug RGB_ON             &rgb_ug RGB_EFF                    &rgb_ug RGB_EFR              &rgb_ug RGB_SPI    &trans  &rgb_ug RGB_BRI  &rgb_ug RGB_BRD  &kp INSERT   &kp F11    &kp F12           &trans
+&kp C_MUTE  &trans                     &trans                     &trans                             &trans                       &trans             &trans  &mkp LCLK        &mkp RCLK        &trans       &trans     &trans
             >;
 
-            display-name = "layer1";
+            display-name = "mod1";
             sensor-bindings = <&scroll_encoder>;
         };
 
         layer_2 {
             bindings = <
-&kp TILDE  &bt BT_SEL 0  &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4    &mmv MOVE_UP     &kp F6  &kp F7  &kp F8      &kp F9     &kp F10      &trans
-&trans     &bt BT_CLR    &bt BT_CLR_ALL  &trans        &trans        &trans          &mmv MOVE_DOWN   &trans  &trans  &kp F11     &kp F12    &kp UNDER    &kp PLUS
-&trans     &out OUT_USB  &out OUT_BLE    &trans        &trans        &trans          &mmv MOVE_LEFT   &trans  &trans  &trans      &trans     &kp LBRC     &kp RBRC
-&trans     &sys_reset    &trans          &bootloader   &trans        &trans          &mmv MOVE_RIGHT  &trans  &trans  &sys_reset  &soft_off  &bootloader  &trans
-&trans     &trans        &trans          &trans        &trans        &trans          &mkp LCLK        &trans  &trans  &trans      &trans     &trans
+&kp TILDE  &bt BT_SEL 0  &bt BT_SEL 1    &bt BT_SEL 2  &bt BT_SEL 3  &bt BT_SEL 4    &trans  &kp F6  &kp F7  &kp F8      &kp F9     &kp F10      &trans
+&trans     &bt BT_CLR    &bt BT_CLR_ALL  &trans        &trans        &trans          &trans  &trans  &trans  &kp F11     &kp F12    &kp UNDER    &kp PLUS
+&trans     &out OUT_USB  &out OUT_BLE    &trans        &trans        &trans          &trans  &trans  &trans  &trans      &trans     &kp LBRC     &kp RBRC
+&trans     &sys_reset    &trans          &bootloader   &trans        &trans          &trans  &trans  &trans  &sys_reset  &soft_off  &bootloader  &trans
+&trans     &trans        &trans          &trans        &trans        &trans          &trans  &trans  &trans  &trans      &trans     &trans
             >;
 
             sensor-bindings = <&scroll_encoder>;
+        };
+
+        layer_3 {
+            bindings = <
+&to 0           &trans  &trans  &trans  &trans  &shift_bootloader    &trans  &shift_bootloader  &kp N7        &kp N8        &kp N9          &trans          &backspace_shift_del
+&trans          &trans  &trans  &trans  &trans  &shift_reset         &trans  &mkp MCLK          &kp NUMBER_4  &kp N5        &kp NUMBER_6    &trans          &trans
+&trans          &trans  &trans  &trans  &trans  &trans               &trans  &msc SCRL_DOWN     &kp NUMBER_1  &kp NUMBER_2  &kp NUMBER_3    &kp UP_ARROW    &mt RIGHT_SHIFT ENTER
+&kp LEFT_SHIFT  &trans  &trans  &trans  &trans  &trans               &trans  &msc SCRL_UP       &kp N0        &kp N0        &kp LEFT_ARROW  &kp DOWN_ARROW  &kp RIGHT_ARROW
+&trans          &trans  &trans  &trans  &trans  &trans               &trans  &mkp LCLK          &mkp RCLK     &trans        &trans          &trans
+            >;
+
+            label = "Mouse, Numpad, Arrows";
+        };
+
+        layer_4 {
+            bindings = <
+&tog 4  &tog 4  &tog 4  &tog 4  &tog 4  &tog 4    &trans  &tog 4     &tog 4     &tog 4            &tog 4          &tog 4     &tog 4
+&tog 4  &tog 4  &tog 4  &tog 4  &tog 4  &tog 4    &trans  &tog 4     &tog 4     &tog 4            &tog 4          &tog 4     &tog 4
+&tog 4  &tog 4  &tog 4  &tog 4  &tog 4  &tog 4    &trans  &tog 4     &tog 4     &tog 4            &tog 4          &tog 4     &tog 4
+&tog 4  &tog 4  &tog 4  &tog 4  &tog 4  &tog 4    &trans  &tog 4     &tog 4     &tog 4            &tog 4          &tog 4     &tog 4
+&tog 4  &tog 4  &tog 4  &tog 4  &tog 4  &tog 4    &trans  &mkp LCLK  &mkp RCLK  &msc SCRL_DOWN  &msc SCRL_UP  &mkp MCLK
+            >;
+
+            label = " mouse only layer";
         };
     };
 };
